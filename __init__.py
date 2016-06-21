@@ -16,6 +16,7 @@ def register():
         Location,
         Party,
         ProductsByLocationsStart,
+        LocationLeadTime,
         Move,
         ShipmentIn,
         ShipmentInReturn,
