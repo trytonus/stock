@@ -571,7 +571,7 @@ class Move(Workflow, ModelSQL, ModelView):
             product_qty = product.quantity
         else:
             product_qty = product.template.quantity
-        product_qty = Decimal(str(max(product_qty, 0)))
+        product_qty = Decimal(str(product_qty))
         # convert wrt currency
         with Transaction().set_context(date=self.effective_date):
             unit_price = Currency.compute(self.currency, self.unit_price,
@@ -579,11 +579,13 @@ class Move(Workflow, ModelSQL, ModelView):
         # convert wrt to the uom
         unit_price = Uom.compute_price(self.uom, unit_price,
             product.default_uom)
-        if product_qty + qty != Decimal('0.0'):
+        if product_qty + qty > 0 and product_qty >= 0:
             new_cost_price = (
                 (product.cost_price * product_qty) + (unit_price * qty)
                 ) / (product_qty + qty)
-        else:
+        elif direction == 'in':
+            new_cost_price = unit_price
+        elif direction == 'out':
             new_cost_price = product.cost_price
 
         if not isinstance(Product.cost_price, TemplateFunction):
